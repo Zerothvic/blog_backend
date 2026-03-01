@@ -9,4 +9,4 @@ userRouter.route('/login').post(loginUser);
 userRouter.route('/logout').post(logoutUser);
 
 
-export {userRouter}
+export default userRouter;

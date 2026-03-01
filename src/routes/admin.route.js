@@ -1,10 +1,5 @@
 import { Router } from 'express';
-import { 
-    getDashboardStats, 
-    adminDeletePost, 
-    adminDeleteComment, 
-    toggleBlockUser 
-} from '../controllers/admin.controller.js';
+import { getDashboardStats, adminDeletePost, adminDeleteComment, toggleBlockUser } from '../controllers/admin.controller.js';
 
 const adminRouter = Router();
 
