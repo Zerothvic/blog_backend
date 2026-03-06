@@ -1,96 +1,115 @@
+import Post from '../models/Post.js'
 
-import { Post } from "../models/post.model.js";
+export async function createPost(req, res) {
+  try {
+    const { title, body } = req.body;
 
-// Create a post
-const createPost = async (req, res) => {
-    try {
-        const {name, description, age } = req.body;
-        if(!name || !description || !age){
-            return res.status(400).json({
-                message: "All fields are required"
-            });
-        }
-
-        const post = await Post.create({name, description, age});
-        
-    } catch (error) {
-        res.status(500).json({
-            message: "Internal Server Error", 
-            error
-        });
+    if (!title || !body) {
+      return res.status(400).json({ message: "Title and body are required" });
     }
+
+    const post = await Post.create({
+      title,
+      body,
+      author: req.user.id, 
+    });
+
+    res.status(201).json(post);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 }
 
-// Read all posts
-const getPosts = async (req, res) => {
-    try {
-        const posts = await Post.find();
-        res.status(200).json(posts);
-    } catch (error) {
-        res.status(500).json({
-            message: "Internal Server Error", 
-            error
-        });
+export async function getAllPosts(req, res){
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = 10;
+    const skip = (page - 1) * limit;
+
+    const posts = await Post.find()
+      .populate("author", "username email")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    res.json(posts);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export async function getSinglePost(req, res){
+  try {
+    const post = await Post.findById(req.params.id)
+      .populate("author", "username email");
+
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
     }
-}
 
-// Update a post
-const updatePost = async (req, res) => {
-    try {
-        // basic validation to check if body is empty
-        if(Object.keys(req.body).length === 0){
-            return res.status(400).json({
-                message: "No data provided for update"
-            });
-        }
+    res.json(post);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
-        // find the post
-        const post = await Post.findByIdAndUpdate(req.params.id, req.body, {new: true});
 
-        // couldn't find post
-        if(!post){
-            return res.status(404).json({
-                message: "Post not found"
-            });
-        }
+export const updatePost = async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
 
-        res.status(200).json({
-            message: "Post updated successfully", post
-        });
-
-    } catch (error) {
-        res.status(500).json({
-            message: "Internal Server Error", 
-            error
-        });
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
     }
-}
 
-// Delete a post
-const deletePost = async (req, res) => {
-    try {
-        const deleted = await Post.findByIdAndDelete(req.params.id);
-    if(!deleted){
-        return res.status(404).json({
-            message: "Post not found"
-        });
-    };
+    if (post.author.toString() !== req.user.id) {
+      return res.status(403).json({
+        message: "You can only edit your own posts"
+      });
+    }
+
+    post.title = req.body.title || post.title;
+    post.body = req.body.body || post.body;
+
+    const updatedPost = await post.save();
+
+    res.status(200).json(updatedPost);
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const deletePost = async (req, res) => {
+  try {
+
+    const post = await Post.findById(req.params.id);
+
+    if (!post) {
+      return res.status(404).json({
+        message: "Post not found"
+      });
+    }
+
+    if (
+      post.author.toString() !== req.user.id &&
+      req.user.role !== "admin"
+    ) {
+      return res.status(403).json({
+        message: "Not authorized to delete this post"
+      });
+    }
+
+    await post.deleteOne();
 
     res.status(200).json({
-        message: "Post successfully deleted"
-        });
-    } catch (error) {
-         res.status(500).json({
-            message: "Internal Server Error", 
-            error
-        });
-    }
-}
+      message: "Post deleted successfully"
+    });
 
-
-export {
-    createPost,
-    getPosts,
-    updatePost,
-    deletePost
+  } catch (error) {
+    res.status(500).json({
+      message: error.message
+    });
+  }
 };
+

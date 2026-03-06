@@ -1,5 +1,5 @@
-
-import { User } from "../models/user.model.js";
+import jwt from "jsonwebtoken";
+import  {User} from "../models/User.js";
 
 const registerUser = async (req, res) => {
     try {
@@ -28,49 +28,68 @@ const registerUser = async (req, res) => {
         //Successfully registered message
         res.status(201).json({
             message: "User registered!",
-            user: {id: user._id, email: user.email, username: user.username }
+            user: {id: user._id, email: user.email, username: user.username,
+                password:user.password
+             }
         });
 
     } catch (error) {
-        res.status(500).json({ message: "Internal server error", error: error.message});
+       console.error(error);
+
+res.status(500).json({
+  message: "Internal server error",
+  error: error.message,
+});
+
     }
 
 };
 
-const loginUser = async(req, res) => {
-    try {
-        
-        // checking if user already exists
-        const{ email, password } = req.body;
-        const user = await User.findOne({
-            email: email.toLowerCase()
-        });
+const loginUser = async (req, res) => {
+  try {
+    const { email, password } = req.body;
 
-        if(!user) return res.status(400).json({
-            message: "User not found"
-        });
+    const user = await User.findOne({
+      email: email.toLowerCase(),
+    });
 
-        // compare password
-        const isMatch = await user.comparePassword(password);
-        if(!isMatch) return res.status(400).json({
-            message: "Invalid credentials"
-        })
-        
-        res.status(200).json({
-            message: "User logged in",
-            user: {
-                id: user._id,
-                email: user.email,
-                username: user.username
-            }
-        })
-
-    } catch (error) {
-        res.status(500).json({
-            message: "Internal Server Error"
-        })
+    if (!user) {
+      return res.status(400).json({
+        message: "User not found",
+      });
     }
-}
+
+    const isMatch = await user.comparePassword(password);
+
+    if (!isMatch) {
+      return res.status(400).json({
+        message: "Invalid credentials",
+      });
+    }
+
+    
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
+    );
+
+    res.status(200).json({
+      message: "User logged in",
+      token,
+      user: {
+        id: user._id,
+        email: user.email,
+        username: user.username,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
+
 
 const logoutUser = async(req, res) => {
     try {
