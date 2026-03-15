@@ -7,7 +7,7 @@ function CreatePost() {
   const [tags, setTags] = useState([]); // <-- new
   const [loading, setLoading] = useState(false);
 
-  // Example tags list — you can fetch from API if dynamic
+  
   const availableTags = ["Tech", "Lifestyle", "Travel", "Food", "News"];
 
   const submitPost = async (e) => {
@@ -25,7 +25,7 @@ function CreatePost() {
         tags, // send tags to backend
       });
 
-      console.log(res.data);
+     
       alert("Post created!");
       setTitle("");
       setContent("");
