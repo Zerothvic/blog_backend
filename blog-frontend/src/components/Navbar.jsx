@@ -7,9 +7,11 @@ function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const logout = () => {
-    localStorage.removeItem("token");
-    navigate("/login");
-  };
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+  navigate("/login");
+};
+
 
   const storedUser = JSON.parse(localStorage.getItem("user")) || {}; 
   const user = storedUser;
