@@ -6,56 +6,80 @@ function Login() {
 
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email,setEmail] = useState("");
+  const [password,setPassword] = useState("");
 
- const handleLogin = async (e) => {
-  e.preventDefault();
+  const handleLogin = async (e) => {
+    e.preventDefault();
 
-  try {
-    const res = await API.post("/auth/login", {
-      email,
-      password
-    });
+    try {
+      const res = await API.post("/auth/login",{
+        email,
+        password
+      });
 
-    localStorage.setItem("token", res.data.token);
-    localStorage.setItem("user", JSON.stringify(res.data.user));
+      localStorage.setItem("token",res.data.token);
+      localStorage.setItem("user",JSON.stringify(res.data.user));
 
-    navigate("/");
+      navigate("/");
 
-  } catch (err) {
-    console.error("Login error:", err.response?.data);
-    alert(err.response?.data?.message || "Login failed");
-  }
-};
+    } catch(err){
+      console.error(err);
+      alert(err.response?.data?.message || "Login failed");
+    }
+  };
 
   return (
-    <div style={{ maxWidth: "400px", margin: "50px auto" }}>
-      <h2>Login</h2>
 
-      <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-        <input
-          type="email"
-          value={email}
-          placeholder="Email"
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
 
-        <input
-          type="password"
-          value={password}
-          placeholder="Password"
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
+      <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
 
-        <button type="submit" style={{ padding: "10px", cursor: "pointer" }}>Login</button>
-      </form>
+        <h2 className="text-3xl font-bold text-center mb-6">
+          Welcome Back
+        </h2>
 
-      <Link to="/register" style={{ color: "blue", marginTop: "10px", display: "block" }}>
-        Don't have an account? Register
-      </Link>
+        <form
+          onSubmit={handleLogin}
+          className="flex flex-col gap-4"
+        >
+
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e)=>setEmail(e.target.value)}
+            className="border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-black"
+            required
+          />
+
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e)=>setPassword(e.target.value)}
+            className="border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-black"
+            required
+          />
+
+          <button
+            type="submit"
+            className="bg-black text-white p-3 rounded-lg hover:bg-gray-800 transition"
+          >
+            Login
+          </button>
+
+        </form>
+
+        <p className="text-center text-gray-600 mt-5">
+          Don't have an account?{" "}
+          <Link to="/register" className="text-black font-semibold">
+            Register
+          </Link>
+        </p>
+
+      </div>
+
     </div>
   );
 }
