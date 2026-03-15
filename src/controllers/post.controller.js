@@ -169,8 +169,7 @@ export const deletePost = async (req, res) => {
 
 export const likePost = async (req, res) => {
   try {
-    console.log("User ID:", req.user?.id); // check if user exists
-    console.log("Post ID param:", req.params.id);
+ 
 
     const post = await Post.findById(req.params.id);
 
@@ -196,7 +195,7 @@ await Notification.create({
 });
     await post.save();
 
-    console.log("Post liked successfully, total likes:", post.likes.length);
+
 
     res.json({ likes: post.likes.length });
   } catch (error) {
