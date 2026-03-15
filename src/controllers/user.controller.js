@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
-import  {User} from "../models/user.model.js";
-
+import  {User} from "../models/User.js";
+import mongoose from "mongoose";
 
 const registerUser = async (req, res) => {
     try {
@@ -113,6 +113,30 @@ const logoutUser = async(req, res) => {
         })
     }
 }
+
+export const getAuthorProfile = async (req, res) => {
+  console.log("getAuthorProfile called with id:", req.params.id);
+
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid user id" });
+    }
+
+    const user = await User.findById(id);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json(user);
+
+  } catch (error) {
+    console.log("PROFILE ERROR:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
 
 export{
     registerUser,
