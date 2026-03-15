@@ -174,7 +174,7 @@ export const likePost = async (req, res) => {
     const post = await Post.findById(req.params.id);
 
     if (!post) {
-      console.log("Post not found!");
+     
       return res.status(404).json({ message: "Post not found" });
     }
 
@@ -199,7 +199,7 @@ await Notification.create({
 
     res.json({ likes: post.likes.length });
   } catch (error) {
-    console.error("Error in likePost controller:", error); // <-- log full error
+  
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
