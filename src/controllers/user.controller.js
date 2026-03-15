@@ -35,7 +35,7 @@ const registerUser = async (req, res) => {
         });
 
     } catch (error) {
-       console.error(error);
+      
 
 res.status(500).json({
   message: "Internal server error",
@@ -115,7 +115,6 @@ const logoutUser = async(req, res) => {
 }
 
 export const getAuthorProfile = async (req, res) => {
-  console.log("getAuthorProfile called with id:", req.params.id);
 
   try {
     const { id } = req.params;
@@ -133,7 +132,7 @@ export const getAuthorProfile = async (req, res) => {
     res.json(user);
 
   } catch (error) {
-    console.log("PROFILE ERROR:", error);
+ 
     res.status(500).json({ message: error.message });
   }
 };
