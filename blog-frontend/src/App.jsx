@@ -11,6 +11,7 @@ import Profile from "./pages/dashboard/Profile";
 import Bookmarks from "./pages/dashboard/Bookmarks";
 import Trending from "./pages/dashboard/Trending";
 import MyPosts from "./pages/dashboard/MyPosts";
+import Notifications from "./pages/dashboard/Notification";
 
 import ProtectedRoute from "./components/ProtectedRoutes";
 import DashboardLayout from "./layouts/DashboardLayout";
@@ -59,6 +60,10 @@ function App() {
 
           {/* My posts */}
           <Route path="my-posts" element={<MyPosts />} />
+
+          <Route path="/notifications" element={<Notifications />} />
+
+
 
         </Route>
 

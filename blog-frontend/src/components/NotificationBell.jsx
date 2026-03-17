@@ -1,9 +1,13 @@
 import { useEffect,useState } from "react";
+import { useNavigate } from "react-router-dom";
 import API from "../services/api";
 
 function NotificationBell(){
 
+  const navigate = useNavigate();
+
   const [count,setCount] = useState(0);
+  
 
   useEffect(()=>{
 
@@ -23,7 +27,11 @@ function NotificationBell(){
 
   return(
 
-    <div style={{position:"relative"}}>
+    <div
+  style={{position:"relative", cursor:"pointer"}}
+  onClick={()=>navigate("/notifications")}
+>
+
 
       🔔
 

@@ -4,7 +4,8 @@ import API from "../../services/api";
 function CreatePost() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [tags, setTags] = useState([]); // <-- new
+  const [tags, setTags] = useState([]);
+  const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(false);
 
   
@@ -19,13 +20,24 @@ function CreatePost() {
     setLoading(true);
 
     try {
-      const res = await API.post("/posts", {
-        title,
-        content,
-        tags, // send tags to backend
-      });
+     const formData = new FormData();
 
-     
+formData.append("title", title);
+formData.append("content", content);
+formData.append("tags", JSON.stringify(tags));
+
+if (image) {
+  formData.append("image", image);
+}
+
+const res = await API.post("/posts", formData, {
+  headers: {
+    "Content-Type": "multipart/form-data",
+  },
+});
+
+
+      console.log(res.data);
       alert("Post created!");
       setTitle("");
       setContent("");
@@ -59,6 +71,14 @@ function CreatePost() {
         onChange={(e) => setContent(e.target.value)}
         className="w-full p-2 border rounded h-32"
       />
+
+      <input
+  type="file"
+  accept="image/*"
+  onChange={(e) => setImage(e.target.files[0])}
+  className="w-full"
+/>
+
 
       {/* Tag selector */}
       <div>

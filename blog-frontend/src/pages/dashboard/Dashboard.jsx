@@ -68,7 +68,7 @@ export default function Dashboard() {
         {/* SIDEBAR */}
         <div className="space-y-6">
 
-          <TrendingPosts />
+          {/* <TrendingPosts /> */}
 
           <div className="bg-white p-4 rounded shadow">
             <h3 className="font-bold mb-2">Categories</h3>
