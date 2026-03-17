@@ -1,6 +1,6 @@
 import express from "express";
 import {
-  createComment,
+  addComment,
   getPostComments,
   deleteComment
 } from "../controllers/comment.controller.js";
@@ -9,7 +9,7 @@ import { protect } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 
-router.post("/:postId", protect, createComment);
+router.post("/:id", protect, addComment);
 
 router.get("/:postId", getPostComments);
 

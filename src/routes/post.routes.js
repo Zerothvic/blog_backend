@@ -9,7 +9,8 @@ import {
   likePost,
   bookmarkPost,
   getTrendingPosts,
-  searchPosts, getPostsByAuthor, uploadAvatar
+  searchPosts, getPostsByAuthor, uploadAvatar,
+  getBookmarkedPosts
 } from "../controllers/post.controller.js";
 
 import { protect } from "../middleware/auth.middleware.js";
@@ -19,6 +20,7 @@ const router = express.Router();
 
 router.get("/", getAllPosts);
 router.get("/trending", getTrendingPosts);
+router.get("/bookmarks", protect, getBookmarkedPosts)
 router.get("/search", searchPosts);
 router.get("/author/:id", getPostsByAuthor);
 router.get("/:id", getPost);
