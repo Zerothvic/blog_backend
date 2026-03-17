@@ -29,7 +29,7 @@ const registerUser = async (req, res) => {
       password
     });
 
-  
+    // ✅ CREATE TOKEN
     const token = jwt.sign(
       { id: user._id },
       process.env.JWT_SECRET,
@@ -127,6 +127,7 @@ const logoutUser = async(req, res) => {
 }
 
 export const getAuthorProfile = async (req, res) => {
+  console.log("getAuthorProfile called with id:", req.params.id);
 
   try {
     const { id } = req.params;
@@ -144,10 +145,66 @@ export const getAuthorProfile = async (req, res) => {
     res.json(user);
 
   } catch (error) {
- 
+    console.log("PROFILE ERROR:", error);
     res.status(500).json({ message: error.message });
   }
 };
+
+
+export const toggleFollow = async (req, res) => {
+  try {
+    const { id: targetUserId } = req.params; 
+    const currentUserId = req.user._id;
+
+    if (!mongoose.Types.ObjectId.isValid(targetUserId)) {
+      return res.status(400).json({ message: "Invalid user id" });
+    }
+
+    if (targetUserId === currentUserId.toString()) {
+      return res.status(400).json({ message: "Cannot follow yourself" });
+    }
+
+    const targetUser = await User.findById(targetUserId);
+    const currentUser = await User.findById(currentUserId);
+
+    if (!targetUser) return res.status(404).json({ message: "User not found" });
+
+    const isFollowing = currentUser.following.includes(targetUserId);
+
+    if (isFollowing) {
+      // Unfollow
+      currentUser.following.pull(targetUserId);
+      targetUser.followers.pull(currentUserId);
+    } else {
+      // Follow
+      currentUser.following.push(targetUserId);
+      targetUser.followers.push(currentUserId);
+    }
+
+    await currentUser.save();
+    await targetUser.save();
+
+    res.json({ following: !isFollowing });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Get followers of a user
+export const getFollowers = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).populate("followers", "username");
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const followerIds = user.followers.map(f => f._id.toString());
+    res.json(followerIds);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 
 export{
     registerUser,

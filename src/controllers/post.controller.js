@@ -4,12 +4,15 @@ import Post from "../models/Post.js";
 import { User } from "../models/User.js";
 import Notification from "../models/Notification.js";
 import mongoose from "mongoose";
-import path from "path";
+
+
+
 export const createPost = async (req, res) => {
 
   try {
+const { title, content } = req.body;
+const tags = JSON.parse(req.body.tags);
 
-    const { title, content, tags } = req.body;
   if (!title || !content || !tags) {
       return res.status(400).json({ message: "Title and body are required" });
     }
@@ -58,7 +61,7 @@ export const getAllPosts = async (req, res) => {
     };
 
     const posts = await Post.find(query)
-      .populate("author", "username email")
+      .populate("author", "username email avatar")
       .skip((page - 1) * limit)
       .limit(limit)
       .sort({ createdAt: -1 });
@@ -89,7 +92,7 @@ export const getPost = async(req,res)=>{
     req.params.id,
     { $inc: { views: 1 } },
     { new: true }
-  ).populate("author","username");
+  ).populate("author", "username email avatar")
 
   res.json(post);
 };
@@ -169,12 +172,13 @@ export const deletePost = async (req, res) => {
 
 export const likePost = async (req, res) => {
   try {
- 
+    console.log("User ID:", req.user?.id); // check if user exists
+    console.log("Post ID param:", req.params.id);
 
     const post = await Post.findById(req.params.id);
 
     if (!post) {
-     
+      console.log("Post not found!");
       return res.status(404).json({ message: "Post not found" });
     }
 
@@ -195,11 +199,11 @@ await Notification.create({
 });
     await post.save();
 
-
+    console.log("Post liked successfully, total likes:", post.likes.length);
 
     res.json({ likes: post.likes.length });
   } catch (error) {
-  
+    console.error("Error in likePost controller:", error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
@@ -213,7 +217,6 @@ export const bookmarkPost = async (req,res)=>{
 
   const userId = req.user.id;
 
-  // ensure bookmarks exists
   if(!post.bookmarks){
     post.bookmarks = [];
   }
@@ -276,13 +279,13 @@ export const getPostsByAuthor = async (req, res) => {
 
     const { id } = req.params;
 
-    // Validate ObjectId
+    
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ message: "Invalid author id" });
     }
 
     const posts = await Post.find({ author: id })
-      .populate("author", "name avatar")
+      .populate("author", "username email avatar")
       .sort({ createdAt: -1 });
 
     res.json(posts);
@@ -309,5 +312,29 @@ export const uploadAvatar = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const getBookmarkedPosts = async (req, res) => {
+  
+  try {
+
+    const userId = req.user.id;
+    
+    const posts = await Post.find({
+      bookmarks: userId
+     
+    })
+    .populate("author", "username email avatar")
+
+    
+    res.json(posts);
+
+  } catch (error) {
+
+    res.status(500).json({
+      message: "Error fetching bookmarks"
+    });
+
   }
 };

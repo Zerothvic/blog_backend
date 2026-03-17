@@ -1,35 +1,40 @@
 import Comment from "../models/Comment.js"
 import Notification from "../models/Notification.js";
+import Post from "../models/Post.js";
+import mongoose from "mongoose";
 
-export const createComment = async (req, res) => {
+export const addComment = async (req, res) => {
+  const { id: postId } = req.params;
+  const { content } = req.body;
 
-  try {
-
-    const comment = await Comment.create({
-      content: req.body.content,
-      author: req.user.id,
-      post: req.params.postId
-    });
-
-    await Notification.create({
-
-  user: post.author,
-  type:"comment",
-  post: post._id
-
-});
-
-    res.status(201).json(comment);
-
-  } catch (error) {
-
-    res.status(500).json({
-      message: "Server error"
-    });
-
+  if (!mongoose.Types.ObjectId.isValid(postId)) {
+    return res.status(400).json({ message: "Invalid post id" });
   }
 
+  const post = await Post.findById(postId);
+  if (!post) return res.status(404).json({ message: "Post not found" });
+
+  const comment = await Comment.create({
+    content,
+    author: req.user._id,
+    post: postId,
+  });
+
+ 
+  await comment.populate("author", "username");
+
+ 
+  if (req.user._id.toString() !== post.author.toString()) {
+    await Notification.create({
+      user: post.author,
+      type: "comment",
+      post: post._id,
+    });
+  }
+
+  res.json(comment);
 };
+
 
 export const getPostComments = async (req, res) => {
 
