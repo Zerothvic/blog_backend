@@ -40,7 +40,15 @@ const userSchema = new Schema(
         bio: {
             type: String,
             default: ""
-        }
+        },
+        // src/models/User.js
+        followers: [
+        { type: mongoose.Schema.Types.ObjectId, ref: "User" }
+        ],
+         following: [
+        { type: mongoose.Schema.Types.ObjectId, ref: "User" }
+         ]
+
     }, 
     { timestamps: true }
 );
